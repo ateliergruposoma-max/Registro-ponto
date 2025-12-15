@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Registro de Ponto</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #4A90E2, #1C3FAA);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .container {
+        background: #ffffff;
+        width: 100%;
+        max-width: 450px;
+        padding: 35px 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(30px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+        text-align: center;
+        color: #1c3faa;
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+        margin-top: 10px;
+    }
+
+    input, button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 5px;
+        border-radius: 10px;
+        font-size: 15px;
+        transition: all 0.2s ease;
+    }
+
+    input {
+        border: 1px solid #d4d4d4;
+        background: #fafafa;
+    }
+
+    input:focus {
+        border-color: #4A90E2;
+        box-shadow: 0 0 6px rgba(74, 144, 226, 0.3);
+        outline: none;
+    }
+
+    button {
+        background: #1c3faa;
+        color: white;
+        border: none;
+        font-size: 17px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 20px;
+    }
+
+    button:hover {
+        background: #16318a;
+    }
+
+    .preview {
+        width: 100%;
+        margin-top: 15px;
+        border-radius: 10px;
+        display: none;
+    }
+
+    .success, .error {
+        text-align: center;
+        padding: 12px;
+        border-radius: 10px;
+        margin-top: 15px;
+        font-weight: 600;
+        display: none;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .success { background: #d4f8d4; color: #2d7a2d; }
+    .error   { background: #ffd7d7; color: #a33a3a; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Registro de Ponto</h2>
+
+    <form id="formPonto">
+        <label>Nome</label>
+        <input type="text" id="nome" placeholder="Digite seu nome">
+
+        <label>Entrada</label>
+        <input type="time" id="entrada">
+
+        <label>Saída</label>
+        <input type="time" id="saida">
+
+        <label>Data</label>
+        <input type="date" id="data">
+
+        <label>Foto / Comprovante</label>
+        <input type="file" id="foto" accept="image/*">
+
+        <img id="previewImagem" class="preview" />
+
+        <button type="button" onclick="enviar()">Enviar Registro</button>
+    </form>
+
+    <div class="success" id="msgSuccess">Registro enviado com sucesso!</div>
+    <div class="error" id="msgError">Preencha todos os campos e envie a foto!</div>
+</div>
+
+
+<script>
+    let fotoBase64 = null;
+
+    // Preview da imagem
+    document.getElementById("foto").addEventListener("change", function() {
+        const file = this.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            fotoBase64 = e.target.result;
+            const imgPreview = document.getElementById("previewImagem");
+            imgPreview.src = fotoBase64;
+            imgPreview.style.display = "block";
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    });
+
+    async function enviar() {
+        const nome = document.getElementById("nome").value.trim();
+        const entrada = document.getElementById("entrada").value;
+        const saida = document.getElementById("saida").value;
+        const data = document.getElementById("data").value;
+
+        const errorMsg = document.getElementById("msgError");
+        const successMsg = document.getElementById("msgSuccess");
+
+        // Reset mensagens
+        errorMsg.style.display = "none";
+        successMsg.style.display = "none";
+
+        if (!nome || !entrada || !saida || !data || !fotoBase64) {
+            errorMsg.style.display = "block";
+            return;
+        }
+
+        const payload = { nome, entrada, saida, data, foto: fotoBase64 };
+
+        try {
+            await fetch("http://localhost:5678/webhook-test/ponto", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(payload)
+            });
+
+            successMsg.style.display = "block";
+            document.getElementById("formPonto").reset();
+            fotoBase64 = null;
+            document.getElementById("previewImagem").style.display = "none";
+
+        } catch (error) {
+            errorMsg.textContent = "Erro ao enviar!";
+            errorMsg.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>
