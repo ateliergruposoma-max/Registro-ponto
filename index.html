@@ -5,198 +5,207 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Registro de Ponto</title>
 
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                primary: "#135bec",
+                "background-light": "#f6f6f8"
+            }
+        }
+    }
+}
+</script>
+
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Inter", sans-serif;
-    }
-
-    body {
-        background: linear-gradient(135deg, #4A90E2, #1C3FAA);
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
-
-    .container {
-        background: #ffffff;
-        width: 100%;
-        max-width: 450px;
-        padding: 35px 30px;
-        border-radius: 16px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        animation: fadeIn 0.6s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-        0% { opacity: 0; transform: translateY(30px); }
-        100% { opacity: 1; transform: translateY(0); }
-    }
-
-    h2 {
-        text-align: center;
-        color: #1c3faa;
-        font-size: 26px;
-        font-weight: 700;
-        margin-bottom: 25px;
-    }
-
-    label {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 8px;
-        display: block;
-        margin-top: 10px;
-    }
-
-    input, button {
-        width: 100%;
-        padding: 14px;
-        margin-top: 5px;
-        border-radius: 10px;
-        font-size: 15px;
-        transition: all 0.2s ease;
-    }
-
-    input {
-        border: 1px solid #d4d4d4;
-        background: #fafafa;
-    }
-
-    input:focus {
-        border-color: #4A90E2;
-        box-shadow: 0 0 6px rgba(74, 144, 226, 0.3);
-        outline: none;
-    }
-
-    button {
-        background: #1c3faa;
-        color: white;
-        border: none;
-        font-size: 17px;
-        cursor: pointer;
-        font-weight: 600;
-        margin-top: 20px;
-    }
-
-    button:hover {
-        background: #16318a;
-    }
-
-    .preview {
-        width: 100%;
-        margin-top: 15px;
-        border-radius: 10px;
-        display: none;
-    }
-
-    .success, .error {
-        text-align: center;
-        padding: 12px;
-        border-radius: 10px;
-        margin-top: 15px;
-        font-weight: 600;
-        display: none;
-        animation: fadeIn 0.4s ease;
-    }
-
-    .success { background: #d4f8d4; color: #2d7a2d; }
-    .error   { background: #ffd7d7; color: #a33a3a; }
+body {
+    font-family: Arial, sans-serif;
+}
 </style>
 </head>
 
-<body>
+<body class="bg-background-light min-h-screen flex items-center justify-center p-4">
 
-<div class="container">
-    <h2>Registro de Ponto</h2>
+<!-- ================= FORMULÁRIO ================= -->
+<div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-4">
 
-    <form id="formPonto">
-        <label>Nome</label>
-        <input type="text" id="nome" placeholder="Digite seu nome">
+    <h2 class="text-2xl font-semibold text-center text-primary">
+        Registro de Ponto
+    </h2>
 
-        <label>Entrada</label>
-        <input type="time" id="entrada">
+    <!-- Nome -->
+    <div class="relative">
+        <label class="block text-sm font-medium mb-1">Nome</label>
+        <input
+            id="nome"
+            type="text"
+            placeholder="Digite para buscar seu nome"
+            class="w-full rounded-lg border px-4 py-3 focus:ring-2 focus:ring-primary"
+            autocomplete="off"
+        />
+        <ul
+            id="listaNomes"
+            class="absolute z-10 w-full border rounded-lg mt-1 max-h-40 overflow-y-auto hidden bg-white"
+        ></ul>
+    </div>
 
-        <label>Saída</label>
-        <input type="time" id="saida">
+    <!-- Entrada -->
+    <div>
+        <label class="block text-sm font-medium mb-1">Entrada</label>
+        <input id="entrada" type="time" class="w-full rounded-lg border px-4 py-3" />
+    </div>
 
-        <label>Data</label>
-        <input type="date" id="data">
+    <!-- Saída -->
+    <div>
+        <label class="block text-sm font-medium mb-1">Saída</label>
+        <input id="saida" type="time" class="w-full rounded-lg border px-4 py-3" />
+    </div>
 
-        <label>Foto / Comprovante</label>
-        <input type="file" id="foto" accept="image/*">
+    <!-- Data -->
+    <div>
+        <label class="block text-sm font-medium mb-1">Data</label>
+        <input id="data" type="date" class="w-full rounded-lg border px-4 py-3" />
+    </div>
 
-        <img id="previewImagem" class="preview" />
+    <!-- Foto -->
+    <div>
+        <label class="block text-sm font-medium mb-1">Foto</label>
+        <input id="foto" type="file" accept="image/*" />
+        <img id="previewImagem" class="hidden mt-3 rounded-lg max-h-48 mx-auto"/>
+    </div>
 
-        <button type="button" onclick="enviar()">Enviar Registro</button>
-    </form>
+    <button
+        onclick="enviar()"
+        class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:opacity-90"
+    >
+        Enviar Registro
+    </button>
 
-    <div class="success" id="msgSuccess">Registro enviado com sucesso!</div>
-    <div class="error" id="msgError">Preencha todos os campos e envie a foto!</div>
+    <p id="msgError" class="hidden text-center text-red-500"></p>
+    <p id="msgSuccess" class="hidden text-center text-green-600">
+        Registro enviado com sucesso!
+    </p>
+
 </div>
 
-
+<!-- ================= SCRIPT ================= -->
 <script>
-    let fotoBase64 = null;
+const URL_GET_NOMES  = "https://labsazzas2154.app.n8n.cloud/webhook/nomes";
+const URL_POST_PONTO = "http://localhost:5678/webhook-test/ponto";
 
-    // Preview da imagem
-    document.getElementById("foto").addEventListener("change", function() {
-        const file = this.files[0];
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            fotoBase64 = e.target.result;
-            const imgPreview = document.getElementById("previewImagem");
-            imgPreview.src = fotoBase64;
-            imgPreview.style.display = "block";
+let cadastro = [];
+let fotoBase64 = null;
+
+// ELEMENTOS
+const inputNome = document.getElementById("nome");
+const inputEntrada = document.getElementById("entrada");
+const inputSaida = document.getElementById("saida");
+const inputData = document.getElementById("data");
+const inputFoto = document.getElementById("foto");
+const lista = document.getElementById("listaNomes");
+const msgError = document.getElementById("msgError");
+const msgSuccess = document.getElementById("msgSuccess");
+const previewImagem = document.getElementById("previewImagem");
+
+// ---------- CARREGAR NOMES ----------
+async function carregarCadastro() {
+    try {
+        const res = await fetch(URL_GET_NOMES);
+        cadastro = await res.json();
+        console.log("Nomes carregados:", cadastro);
+    } catch (e) {
+        console.error("Erro ao buscar nomes", e);
+    }
+}
+
+// ---------- AUTOCOMPLETE (ORDENADO + LIMITE) ----------
+function renderLista(valor = "") {
+    lista.innerHTML = "";
+
+    const filtrados = cadastro
+        .filter(p => {
+            if (!p.Nome) return false;
+
+            const nome = p.Nome.trim();
+
+            if (
+                nome === "" ||
+                nome === "0" ||
+                nome === "--USUÁRIO NÃO ENCONTRADO"
+            ) return false;
+
+            return nome.toLowerCase().includes(valor.toLowerCase());
+        })
+        .sort((a, b) => a.Nome.localeCompare(b.Nome, "pt-BR"))
+        .slice(0, 15); // 🔢 LIMITE DE 15 NOMES
+
+    filtrados.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = p.Nome;
+        li.className = "px-4 py-2 cursor-pointer hover:bg-primary hover:text-white";
+        li.onclick = () => {
+            inputNome.value = p.Nome;
+            lista.classList.add("hidden");
         };
-
-        if (file) {
-            reader.readAsDataURL(file);
-        }
+        lista.appendChild(li);
     });
 
-    async function enviar() {
-        const nome = document.getElementById("nome").value.trim();
-        const entrada = document.getElementById("entrada").value;
-        const saida = document.getElementById("saida").value;
-        const data = document.getElementById("data").value;
+    lista.classList.toggle("hidden", filtrados.length === 0);
+}
 
-        const errorMsg = document.getElementById("msgError");
-        const successMsg = document.getElementById("msgSuccess");
+inputNome.addEventListener("focus", () => renderLista());
+inputNome.addEventListener("input", () => renderLista(inputNome.value));
 
-        // Reset mensagens
-        errorMsg.style.display = "none";
-        successMsg.style.display = "none";
+document.addEventListener("click", e => {
+    if (!e.target.closest("#nome")) lista.classList.add("hidden");
+});
 
-        if (!nome || !entrada || !saida || !data || !fotoBase64) {
-            errorMsg.style.display = "block";
-            return;
-        }
+// ---------- FOTO ----------
+inputFoto.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
 
-        const payload = { nome, entrada, saida, data, foto: fotoBase64 };
+    const reader = new FileReader();
+    reader.onload = e => {
+        fotoBase64 = e.target.result.split(",")[1];
+        previewImagem.src = e.target.result;
+        previewImagem.classList.remove("hidden");
+    };
+    reader.readAsDataURL(file);
+});
 
-        try {
-            await fetch("http://localhost:5678/webhook-test/ponto", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(payload)
-            });
+// ---------- ENVIAR ----------
+async function enviar() {
+    msgError.classList.add("hidden");
+    msgSuccess.classList.add("hidden");
 
-            successMsg.style.display = "block";
-            document.getElementById("formPonto").reset();
-            fotoBase64 = null;
-            document.getElementById("previewImagem").style.display = "none";
-
-        } catch (error) {
-            errorMsg.textContent = "Erro ao enviar!";
-            errorMsg.style.display = "block";
-        }
+    if (!inputNome.value || !inputSaida.value || !inputData.value || !fotoBase64) {
+        msgError.textContent = "Preencha todos os campos.";
+        msgError.classList.remove("hidden");
+        return;
     }
+
+    await fetch(URL_POST_PONTO, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            nome: inputNome.value,
+            entrada: inputEntrada.value,
+            saida: inputSaida.value,
+            data: inputData.value,
+            foto: fotoBase64
+        })
+    });
+
+    msgSuccess.classList.remove("hidden");
+}
+
+// ---------- INICIAR ----------
+window.onload = carregarCadastro;
 </script>
 
 </body>
