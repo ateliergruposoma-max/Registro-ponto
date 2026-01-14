@@ -30,7 +30,6 @@ body {
 
 <body class="bg-background-light min-h-screen flex items-center justify-center p-4">
 
-<!-- ================= FORMULÁRIO ================= -->
 <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-4">
 
     <h2 class="text-2xl font-semibold text-center text-primary">
@@ -53,7 +52,7 @@ body {
         ></ul>
     </div>
 
-    <!-- Entrada -->
+    <!-- Entrada (opcional) -->
     <div>
         <label class="block text-sm font-medium mb-1">Entrada</label>
         <input id="entrada" type="time" class="w-full rounded-lg border px-4 py-3" />
@@ -92,13 +91,13 @@ body {
 
 </div>
 
-<!-- ================= SCRIPT ================= -->
 <script>
-const URL_GET_NOMES  = "https://labsazzas2154.app.n8n.cloud/webhook/nomes";
-const URL_POST_PONTO = "https://labsazzas2154.app.n8n.cloud/webhook/ponto";
+const URL_GET_NOMES  = "https://labsazzas2154.app.n8n.cloud/webhook-test/nomes";
+const URL_POST_PONTO = "http://localhost:5678/webhook-test/ponto";
 
 let cadastro = [];
 let fotoBase64 = null;
+let nomeSelecionado = false;
 
 // ELEMENTOS
 const inputNome = document.getElementById("nome");
@@ -116,32 +115,24 @@ async function carregarCadastro() {
     try {
         const res = await fetch(URL_GET_NOMES);
         cadastro = await res.json();
-        console.log("Nomes carregados:", cadastro);
     } catch (e) {
         console.error("Erro ao buscar nomes", e);
     }
 }
 
-// ---------- AUTOCOMPLETE (ORDENADO + LIMITE) ----------
+// ---------- AUTOCOMPLETE ----------
 function renderLista(valor = "") {
     lista.innerHTML = "";
 
     const filtrados = cadastro
         .filter(p => {
             if (!p.Nome) return false;
-
             const nome = p.Nome.trim();
-
-            if (
-                nome === "" ||
-                nome === "0" ||
-                nome === "--USUÁRIO NÃO ENCONTRADO"
-            ) return false;
-
+            if (nome === "" || nome === "0" || nome === "--USUÁRIO NÃO ENCONTRADO") return false;
             return nome.toLowerCase().includes(valor.toLowerCase());
         })
         .sort((a, b) => a.Nome.localeCompare(b.Nome, "pt-BR"))
-        .slice(0, 15); // 🔢 LIMITE DE 15 NOMES
+        .slice(0, 15);
 
     filtrados.forEach(p => {
         const li = document.createElement("li");
@@ -149,6 +140,7 @@ function renderLista(valor = "") {
         li.className = "px-4 py-2 cursor-pointer hover:bg-primary hover:text-white";
         li.onclick = () => {
             inputNome.value = p.Nome;
+            nomeSelecionado = true;
             lista.classList.add("hidden");
         };
         lista.appendChild(li);
@@ -157,11 +149,26 @@ function renderLista(valor = "") {
     lista.classList.toggle("hidden", filtrados.length === 0);
 }
 
-inputNome.addEventListener("focus", () => renderLista());
-inputNome.addEventListener("input", () => renderLista(inputNome.value));
+inputNome.addEventListener("focus", () => {
+    nomeSelecionado = false;
+    renderLista();
+});
+
+inputNome.addEventListener("input", () => {
+    nomeSelecionado = false;
+    renderLista(inputNome.value);
+});
+
+inputNome.addEventListener("blur", () => {
+    setTimeout(() => {
+        if (!nomeSelecionado) {
+            inputNome.value = "";
+        }
+    }, 150);
+});
 
 document.addEventListener("click", e => {
-    if (!e.target.closest("#nome")) lista.classList.add("hidden");
+    if (!e.target.closest(".relative")) lista.classList.add("hidden");
 });
 
 // ---------- FOTO ----------
@@ -183,8 +190,8 @@ async function enviar() {
     msgError.classList.add("hidden");
     msgSuccess.classList.add("hidden");
 
-    if (!inputNome.value || !inputSaida.value || !inputData.value || !fotoBase64) {
-        msgError.textContent = "Preencha todos os campos.";
+    if (!inputNome.value || !nomeSelecionado || !inputSaida.value || !inputData.value || !fotoBase64) {
+        msgError.textContent = "Preencha todos os campos obrigatórios.";
         msgError.classList.remove("hidden");
         return;
     }
@@ -194,7 +201,7 @@ async function enviar() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             nome: inputNome.value,
-            entrada: inputEntrada.value,
+            entrada: inputEntrada.value || null,
             saida: inputSaida.value,
             data: inputData.value,
             foto: fotoBase64
@@ -210,4 +217,3 @@ window.onload = carregarCadastro;
 
 </body>
 </html>
-
