@@ -55,16 +55,18 @@ body {
         ></ul>
     </div>
 
-    <!-- Entrada (opcional) -->
+    <!-- Entrada -->
     <div>
-        <label class="block text-sm font-medium mb-1">Entrada</label>
+        <label class="block text-sm font-medium mb-1">
+            Entrada
+        </label>
         <input id="entrada" type="time" class="w-full rounded-lg border px-4 py-3" />
     </div>
 
     <!-- Saída -->
     <div>
         <label class="block text-sm font-medium mb-1">
-            Saída <span class="text-red-500">*</span>
+            Saída
         </label>
         <input id="saida" type="time" class="w-full rounded-lg border px-4 py-3" />
     </div>
@@ -216,8 +218,17 @@ async function enviar() {
     msgError.classList.add("hidden");
     msgSuccess.classList.add("hidden");
 
-    if (!inputNome.value || !nomeSelecionado || !inputSaida.value || !inputData.value || !fotoBase64) {
-        msgError.textContent = "Preencha todos os campos obrigatórios.";
+    const entradaPreenchida = !!inputEntrada.value;
+    const saidaPreenchida = !!inputSaida.value;
+
+    if (
+        !inputNome.value ||
+        !nomeSelecionado ||
+        !inputData.value ||
+        !fotoBase64 ||
+        (!entradaPreenchida && !saidaPreenchida)
+    ) {
+        msgError.textContent = "Informe Nome, Data, Foto e pelo menos Entrada ou Saída.";
         msgError.classList.remove("hidden");
         return;
     }
@@ -234,7 +245,7 @@ async function enviar() {
             body: JSON.stringify({
                 nome: inputNome.value,
                 entrada: inputEntrada.value || null,
-                saida: inputSaida.value,
+                saida: inputSaida.value || null,
                 data: inputData.value,
                 foto: fotoBase64
             })
